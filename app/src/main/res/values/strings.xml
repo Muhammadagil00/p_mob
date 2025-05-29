@@ -1,0 +1,67 @@
+<resources>
+    <string name="app_name">CarWash App</string>
+
+    <!-- Common -->
+    <string name="welcome">Selamat datang!</string>
+    <string name="loading">Memuat...</string>
+    <string name="retry">Coba Lagi</string>
+    <string name="error">Terjadi kesalahan</string>
+
+    <!-- Authentication -->
+    <string name="login">Masuk</string>
+    <string name="register">Daftar</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="full_name">Nama Lengkap</string>
+    <string name="login_subtitle">Masuk ke akun Anda</string>
+    <string name="register_subtitle">Buat akun baru</string>
+    <string name="already_have_account">Sudah punya akun?</string>
+    <string name="dont_have_account">Belum punya akun?</string>
+
+    <!-- Main -->
+    <string name="our_services">Layanan Kami</string>
+    <string name="booking_service">Booking Service</string>
+    <string name="booking_subtitle">Pesan layanan cuci mobil</string>
+    <string name="booking_history">Riwayat Booking</string>
+    <string name="history_subtitle">Lihat riwayat pesanan Anda</string>
+    <string name="about_service">Tentang Layanan</string>
+    <string name="service_description">Kami menyediakan layanan cuci mobil profesional dengan kualitas terbaik. Booking sekarang dan nikmati kemudahan layanan kami!</string>
+
+    <!-- Booking -->
+    <string name="choose_service">Pilih Layanan</string>
+    <string name="date_time">Tanggal &amp; Waktu</string>
+    <string name="location">Lokasi</string>
+    <string name="date">Tanggal</string>
+    <string name="time">Jam</string>
+    <string name="address_hint">Masukkan alamat lengkap</string>
+    <string name="confirm_booking">Konfirmasi Booking</string>
+    <string name="important_info">Informasi Penting</string>
+    <string name="booking_info">• Pastikan kendaraan dalam kondisi mudah diakses\n• Tim akan datang sesuai jadwal yang dipilih\n• Pembayaran dapat dilakukan setelah layanan selesai</string>
+
+    <!-- History -->
+    <string name="booking_history_title">Riwayat Booking</string>
+    <string name="history_subtitle_detail">Lihat semua pesanan Anda</string>
+    <string name="no_booking_history">Belum ada riwayat booking.\nSilakan buat booking terlebih dahulu.</string>
+    <string name="create_booking">Buat Booking</string>
+
+    <!-- Status -->
+    <string name="status_completed">Selesai</string>
+    <string name="status_in_progress">Sedang Dikerjakan</string>
+    <string name="status_waiting">Menunggu</string>
+    <string name="status_pending">Pending</string>
+
+    <!-- Admin -->
+    <string name="admin_dashboard">Dashboard Admin</string>
+    <string name="welcome_admin">Selamat datang, Admin</string>
+    <string name="manage_services">Kelola Layanan</string>
+    <string name="view_all_bookings">Lihat Semua Booking</string>
+    <string name="total_bookings">Total Booking</string>
+    <string name="recent_bookings">Booking Terbaru</string>
+    <string name="admin_actions">Aksi Admin</string>
+    <string name="logout">Logout</string>
+
+    <!-- Services -->
+    <string name="available_services">Layanan Tersedia</string>
+    <string name="service_price_from">Mulai dari</string>
+    <string name="manage_all_services">Manage semua layanan CarWash</string>
+</resources>
