@@ -1,38 +1,95 @@
 package com.example.carwashapp.api;
 
-
-import com.example.carwashapp.models.LoginResponse;
-import com.example.carwashapp.models.User;
-import com.example.carwashapp.models.Booking;
-import com.example.carwashapp.models.Service;
-import com.example.carwashapp.models.BookingListResponse;
-
+import com.example.carwashapp.models.*;
 
 import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.POST;
-import retrofit2.http.GET;
-import retrofit2.http.Path;
+import retrofit2.http.*;
 import java.util.List;
 
 public interface ApiService {
 
+    // Authentication Endpoints
     @POST("api/users/register")
-    Call<User> registerUser(@Body User user);
+    Call<ApiResponse<User>> registerUser(@Body RegisterRequest request);
 
     @POST("api/users/login")
-    Call<LoginResponse> loginUser(@Body User user);
+    Call<LoginResponse> loginUser(@Body LoginRequest request);
+
+    @GET("api/users/profile")
+    Call<ApiResponse<User>> getUserProfile(@Header("Authorization") String token);
+
+    @PUT("api/users/profile")
+    Call<ApiResponse<User>> updateProfile(@Header("Authorization") String token, @Body User user);
+
+    // Services Endpoints
+    @GET("api/services")
+    Call<ApiResponse<List<Service>>> getServices();
+
+    @GET("api/services/{id}")
+    Call<ApiResponse<Service>> getServiceDetails(@Path("id") String serviceId);
+
+    // Vehicles Endpoints
+    @GET("api/vehicles")
+    Call<ApiResponse<List<Vehicle>>> getVehicles(@Header("Authorization") String token);
+
+    @POST("api/vehicles")
+    Call<ApiResponse<Vehicle>> addVehicle(@Header("Authorization") String token, @Body Vehicle vehicle);
+
+    @GET("api/vehicles/{id}")
+    Call<ApiResponse<Vehicle>> getVehicleDetails(@Header("Authorization") String token, @Path("id") String vehicleId);
+
+    @PUT("api/vehicles/{id}")
+    Call<ApiResponse<Vehicle>> updateVehicle(@Header("Authorization") String token, @Path("id") String vehicleId, @Body Vehicle vehicle);
+
+    @DELETE("api/vehicles/{id}")
+    Call<ApiResponse<Void>> deleteVehicle(@Header("Authorization") String token, @Path("id") String vehicleId);
+
+    // Bookings Endpoints
+    @GET("api/bookings/available-slots")
+    Call<ApiResponse<List<String>>> getAvailableSlots(@Query("date") String date);
 
     @POST("api/bookings")
-    Call<Booking> createBooking(@Body Booking booking);
-
-    @GET("api/services")
-    Call<List<Service>> getServices();
+    Call<ApiResponse<Booking>> createBooking(@Header("Authorization") String token, @Body CreateBookingRequest request);
 
     @GET("api/bookings")
-    Call<BookingListResponse> getBookings();
+    Call<ApiResponse<List<Booking>>> getUserBookings(@Header("Authorization") String token);
 
-    @GET("api/users/{userId}/bookings")
-    Call<BookingListResponse> getUserBookings(@Path("userId") String userId);
+    @GET("api/bookings/{id}")
+    Call<ApiResponse<Booking>> getBookingDetails(@Header("Authorization") String token, @Path("id") String bookingId);
+
+    @PATCH("api/bookings/{id}/cancel")
+    Call<ApiResponse<Booking>> cancelBooking(@Header("Authorization") String token, @Path("id") String bookingId);
+
+    // Transactions Endpoints
+    @POST("api/transactions")
+    Call<ApiResponse<Transaction>> createTransaction(@Header("Authorization") String token, @Body Transaction transaction);
+
+    @GET("api/transactions")
+    Call<ApiResponse<List<Transaction>>> getUserTransactions(@Header("Authorization") String token);
+
+    @GET("api/transactions/{id}")
+    Call<ApiResponse<Transaction>> getTransactionDetails(@Header("Authorization") String token, @Path("id") String transactionId);
+
+    @PATCH("api/transactions/{id}/confirm")
+    Call<ApiResponse<Transaction>> confirmPayment(@Header("Authorization") String token, @Path("id") String transactionId);
+
+    // Reviews Endpoints
+    @POST("api/reviews")
+    Call<ApiResponse<Review>> createReview(@Header("Authorization") String token, @Body Review review);
+
+    @GET("api/reviews")
+    Call<ApiResponse<List<Review>>> getUserReviews(@Header("Authorization") String token);
+
+    @GET("api/reviews/all")
+    Call<ApiResponse<List<Review>>> getAllReviews();
+
+    @PUT("api/reviews/{id}")
+    Call<ApiResponse<Review>> updateReview(@Header("Authorization") String token, @Path("id") String reviewId, @Body Review review);
+
+    @DELETE("api/reviews/{id}")
+    Call<ApiResponse<Void>> deleteReview(@Header("Authorization") String token, @Path("id") String reviewId);
+
+    @GET("api/reviews/booking/{bookingId}")
+    Call<ApiResponse<Review>> getReviewByBooking(@Header("Authorization") String token, @Path("bookingId") String bookingId);
 
 }

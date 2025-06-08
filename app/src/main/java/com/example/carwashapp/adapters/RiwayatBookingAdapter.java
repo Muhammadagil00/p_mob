@@ -11,10 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.carwashapp.R;
 import com.example.carwashapp.models.Booking;
 
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Locale;
 
 public class RiwayatBookingAdapter extends RecyclerView.Adapter<RiwayatBookingAdapter.ViewHolder> {
 
@@ -43,23 +40,32 @@ public class RiwayatBookingAdapter extends RecyclerView.Adapter<RiwayatBookingAd
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Booking booking = bookingList.get(position);
-        
-        // Set service type
-        holder.tvServiceType.setText(booking.getServiceType() != null ? booking.getServiceType() : "Service");
-        
-        // Format and set date
+
+        // Set service name (from related service object or serviceId)
+        String serviceName = "Layanan";
+        if (booking.getService() != null && booking.getService().getName() != null) {
+            serviceName = booking.getService().getName();
+        } else if (booking.getServiceId() != null) {
+            serviceName = "Service ID: " + booking.getServiceId();
+        }
+        holder.tvServiceType.setText(serviceName);
+
+        // Format and set date with time slot
         String dateText = "Tanggal: " + (booking.getDate() != null ? booking.getDate() : "Tidak diketahui");
+        if (booking.getTimeSlot() != null) {
+            dateText += " (" + booking.getTimeSlot() + ")";
+        }
         holder.tvDate.setText(dateText);
-        
+
         // Set location
         String locationText = "Lokasi: " + (booking.getLocation() != null ? booking.getLocation() : "Tidak diketahui");
         holder.tvLocation.setText(locationText);
-        
+
         // Set status with color
         String status = booking.getStatus() != null ? booking.getStatus() : "pending";
         holder.tvStatus.setText(getStatusText(status));
         holder.tvStatus.setBackgroundColor(getStatusColor(status));
-        
+
         // Set click listener
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
@@ -75,24 +81,24 @@ public class RiwayatBookingAdapter extends RecyclerView.Adapter<RiwayatBookingAd
 
     private String getStatusText(String status) {
         switch (status.toLowerCase()) {
-            case "completed":
+            case "done":
                 return "Selesai";
-            case "in_progress":
+            case "processing":
                 return "Sedang Dikerjakan";
             case "pending":
                 return "Menunggu";
             case "cancelled":
                 return "Dibatalkan";
             default:
-                return "Pending";
+                return "Menunggu";
         }
     }
 
     private int getStatusColor(String status) {
         switch (status.toLowerCase()) {
-            case "completed":
+            case "done":
                 return 0xFF4CAF50; // Green
-            case "in_progress":
+            case "processing":
                 return 0xFF2196F3; // Blue
             case "pending":
                 return 0xFFFF9800; // Orange

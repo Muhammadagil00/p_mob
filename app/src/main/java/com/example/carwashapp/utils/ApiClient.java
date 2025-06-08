@@ -19,40 +19,29 @@ public class ApiClient {
     private static final String BASE_URL = "https://pb-carwash-backend-production.up.railway.app/";
     private static Retrofit retrofit = null;
 
-    public static ApiService getApiService(Context context) {
-        // Always recreate the client to ensure fresh authentication headers
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(logging)
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public Response intercept(Chain chain) throws IOException {
-                        Request original = chain.request();
-                        SessionManager sessionManager = new SessionManager(context);
-                        String token = sessionManager.getToken();
-
-                        Request.Builder builder = original.newBuilder();
-
-                        if (token != null && !token.isEmpty()) {
-                            builder.header("Authorization", "Bearer " + token);
-                            android.util.Log.d("ApiClient", "Adding auth header with token: " + token.substring(0, Math.min(10, token.length())) + "...");
-                        } else {
-                            android.util.Log.w("ApiClient", "No token available for request to: " + original.url());
-                        }
-
-                        // Add common headers
-                        builder.header("Content-Type", "application/json");
-                        builder.header("Accept", "application/json");
-
-                        Request request = builder.build();
-                        return chain.proceed(request);
-                    }
-                })
-                .build();
-
+    public static ApiService getApiService() {
         if (retrofit == null) {
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .addInterceptor(logging)
+                    .addInterceptor(new Interceptor() {
+                        @Override
+                        public Response intercept(Chain chain) throws IOException {
+                            Request original = chain.request();
+                            Request.Builder builder = original.newBuilder();
+
+                            // Add common headers
+                            builder.header("Content-Type", "application/json");
+                            builder.header("Accept", "application/json");
+
+                            Request request = builder.build();
+                            return chain.proceed(request);
+                        }
+                    })
+                    .build();
+
             retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
                     .client(client)
@@ -61,5 +50,10 @@ public class ApiClient {
         }
 
         return retrofit.create(ApiService.class);
+    }
+
+    // Helper method to create Authorization header
+    public static String createAuthHeader(String token) {
+        return "Bearer " + token;
     }
 }

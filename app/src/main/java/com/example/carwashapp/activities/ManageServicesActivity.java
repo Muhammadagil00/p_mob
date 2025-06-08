@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.carwashapp.R;
 import com.example.carwashapp.adapters.ServiceSliderAdapter;
 import com.example.carwashapp.api.ApiService;
+import com.example.carwashapp.models.ApiResponse;
 import com.example.carwashapp.models.Service;
 import com.example.carwashapp.utils.ApiClient;
 import com.example.carwashapp.utils.SessionManager;
@@ -42,7 +43,7 @@ public class ManageServicesActivity extends AppCompatActivity {
 
     private void initViews() {
         sessionManager = new SessionManager(this);
-        apiService = ApiClient.getApiService(this);
+        apiService = ApiClient.getApiService();
 
         rvServices = findViewById(R.id.rvServices);
         if (rvServices != null) {
@@ -58,31 +59,37 @@ public class ManageServicesActivity extends AppCompatActivity {
     }
 
     private void loadServices() {
-        apiService.getServices().enqueue(new Callback<List<Service>>() {
+        apiService.getServices().enqueue(new Callback<ApiResponse<List<Service>>>() {
             @Override
-            public void onResponse(Call<List<Service>> call, Response<List<Service>> response) {
+            public void onResponse(Call<ApiResponse<List<Service>>> call, Response<ApiResponse<List<Service>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<Service> services = response.body();
-                    serviceAdapter = new ServiceSliderAdapter(services);
-                    serviceAdapter.setOnServiceClickListener(service -> {
-                        // Handle service click for editing
+                    ApiResponse<List<Service>> apiResponse = response.body();
+                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
+                        List<Service> services = apiResponse.getData();
+                        serviceAdapter = new ServiceSliderAdapter(services);
+                        serviceAdapter.setOnServiceClickListener(service -> {
+                            // Handle service click for editing
+                            Toast.makeText(ManageServicesActivity.this,
+                                "Edit service: " + service.getName(), Toast.LENGTH_SHORT).show();
+                        });
+                        if (rvServices != null) {
+                            rvServices.setAdapter(serviceAdapter);
+                        }
                         Toast.makeText(ManageServicesActivity.this,
-                            "Edit service: " + service.getName(), Toast.LENGTH_SHORT).show();
-                    });
-                    if (rvServices != null) {
-                        rvServices.setAdapter(serviceAdapter);
+                            "Berhasil memuat " + services.size() + " layanan dari API", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Log.e(TAG, "API mengembalikan error: " + apiResponse.getError());
+                        loadDemoServices();
                     }
-                    Toast.makeText(ManageServicesActivity.this,
-                        "Loaded " + services.size() + " services from API", Toast.LENGTH_SHORT).show();
                 } else {
-                    Log.e(TAG, "Failed to load services: " + response.message());
+                    Log.e(TAG, "Gagal memuat layanan: " + response.message());
                     loadDemoServices();
                 }
             }
 
             @Override
-            public void onFailure(Call<List<Service>> call, Throwable t) {
-                Log.e(TAG, "Network error: " + t.getMessage());
+            public void onFailure(Call<ApiResponse<List<Service>>> call, Throwable t) {
+                Log.e(TAG, "Error jaringan: " + t.getMessage());
                 loadDemoServices();
             }
         });

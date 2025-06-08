@@ -98,7 +98,7 @@
                 android:layout_height="56dp"
                 android:background="@drawable/bg_button_secondary"
                 android:text="Lihat Semua Booking"
-                android:textColor="#2196F3"
+                android:textColor="#FFF"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="12dp" />

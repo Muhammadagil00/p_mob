@@ -5,7 +5,10 @@ public class User {
     private String name;
     private String email;
     private String password;
+    private String phone;
     private String role;
+    private String createdAt;
+    private String updatedAt;
 
     public User() {}
 
@@ -28,6 +31,15 @@ public class User {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public String getCreatedAt() { return createdAt; }
+    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+
+    public String getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
 }

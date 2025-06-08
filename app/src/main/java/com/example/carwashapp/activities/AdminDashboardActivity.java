@@ -1,5 +1,7 @@
 package com.example.carwashapp.activities;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,8 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.carwashapp.R;
 import com.example.carwashapp.api.ApiService;
+import com.example.carwashapp.models.ApiResponse;
 import com.example.carwashapp.models.Booking;
-import com.example.carwashapp.models.BookingListResponse;
 import com.example.carwashapp.utils.ApiClient;
 import com.example.carwashapp.utils.SessionManager;
 
@@ -50,7 +52,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
     private void initViews() {
         sessionManager = new SessionManager(this);
-        apiService = ApiClient.getApiService(this);
+        apiService = ApiClient.getApiService();
 
         tvWelcomeAdmin = findViewById(R.id.tvWelcomeAdmin);
         tvTotalBookings = findViewById(R.id.tvTotalBookings);
@@ -96,12 +98,20 @@ public class AdminDashboardActivity extends AppCompatActivity {
     }
 
     private void loadRecentBookings() {
-        apiService.getBookings().enqueue(new Callback<BookingListResponse>() {
+        String token = sessionManager.getToken();
+        if (token == null) {
+            Log.w(TAG, "Token tidak tersedia untuk admin");
+            loadDemoBookings();
+            return;
+        }
+
+        apiService.getUserBookings(ApiClient.createAuthHeader(token)).enqueue(new Callback<ApiResponse<List<Booking>>>() {
             @Override
-            public void onResponse(Call<BookingListResponse> call, Response<BookingListResponse> response) {
+            public void onResponse(Call<ApiResponse<List<Booking>>> call, Response<ApiResponse<List<Booking>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<Booking> bookings = response.body().getData();
-                    if (bookings != null) {
+                    ApiResponse<List<Booking>> apiResponse = response.body();
+                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
+                        List<Booking> bookings = apiResponse.getData();
                         tvTotalBookings.setText("Total Booking: " + bookings.size());
 
                         // Show only recent 5 bookings
@@ -110,19 +120,21 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
                         // For now, just show count - can add adapter later
                         Toast.makeText(AdminDashboardActivity.this,
-                            "Loaded " + bookings.size() + " bookings from API", Toast.LENGTH_SHORT).show();
+                            "Berhasil memuat " + bookings.size() + " booking dari API", Toast.LENGTH_SHORT).show();
                     } else {
+                        Log.e(TAG, "API mengembalikan error: " + apiResponse.getError());
                         tvTotalBookings.setText("Total Booking: 0");
+                        loadDemoBookings();
                     }
                 } else {
-                    Log.e(TAG, "Failed to load bookings: " + response.message());
+                    Log.e(TAG, "Gagal memuat booking: " + response.message());
                     loadDemoBookings();
                 }
             }
 
             @Override
-            public void onFailure(Call<BookingListResponse> call, Throwable t) {
-                Log.e(TAG, "Network error: " + t.getMessage());
+            public void onFailure(Call<ApiResponse<List<Booking>>> call, Throwable t) {
+                Log.e(TAG, "Error jaringan: " + t.getMessage());
                 loadDemoBookings();
             }
         });
@@ -134,7 +146,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
         Booking booking1 = new Booking();
         booking1.setId("demo_booking_1");
-        booking1.setServiceType("Cuci Mobil Basic");
+//        booking1.setServiceType("Cuci Mobil Basic");
         booking1.setDate("2024-01-15");
         booking1.setLocation("Jakarta Selatan");
         booking1.setStatus("completed");
@@ -142,7 +154,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
         Booking booking2 = new Booking();
         booking2.setId("demo_booking_2");
-        booking2.setServiceType("Cuci Mobil Premium");
+//        booking2.setServiceType("Cuci Mobil Premium");
         booking2.setDate("2024-01-14");
         booking2.setLocation("Jakarta Pusat");
         booking2.setStatus("in_progress");
@@ -150,7 +162,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
         Booking booking3 = new Booking();
         booking3.setId("demo_booking_3");
-        booking3.setServiceType("Cuci Motor");
+//        booking3.setServiceType("Cuci Motor");
         booking3.setDate("2024-01-13");
         booking3.setLocation("Jakarta Utara");
         booking3.setStatus("pending");

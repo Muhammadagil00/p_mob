@@ -17,8 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.carwashapp.R;
 import com.example.carwashapp.adapters.RiwayatBookingAdapter;
 import com.example.carwashapp.api.ApiService;
+import com.example.carwashapp.models.ApiResponse;
 import com.example.carwashapp.models.Booking;
-import com.example.carwashapp.models.BookingListResponse;
 import com.example.carwashapp.utils.ApiClient;
 import com.example.carwashapp.utils.SessionManager;
 
@@ -50,7 +50,7 @@ public class BookingFragment extends Fragment {
 
     private void initViews(View view) {
         sessionManager = new SessionManager(requireContext());
-        apiService = ApiClient.getApiService(requireContext());
+        apiService = ApiClient.getApiService();
         
         rvBookings = view.findViewById(R.id.rvBookings);
         tvNoBookings = view.findViewById(R.id.tvNoBookings);
@@ -62,31 +62,37 @@ public class BookingFragment extends Fragment {
     }
 
     private void loadBookings() {
-        String userId = sessionManager.getUserId();
-        if (userId == null) {
+        String token = sessionManager.getToken();
+        if (token == null) {
             showNoBookings();
             return;
         }
 
-        apiService.getUserBookings(userId).enqueue(new Callback<BookingListResponse>() {
+        apiService.getUserBookings(ApiClient.createAuthHeader(token)).enqueue(new Callback<ApiResponse<List<Booking>>>() {
             @Override
-            public void onResponse(Call<BookingListResponse> call, Response<BookingListResponse> response) {
+            public void onResponse(Call<ApiResponse<List<Booking>>> call, Response<ApiResponse<List<Booking>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<Booking> bookings = response.body().getData();
-                    if (bookings != null && !bookings.isEmpty()) {
-                        showBookings(bookings);
+                    ApiResponse<List<Booking>> apiResponse = response.body();
+                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
+                        List<Booking> bookings = apiResponse.getData();
+                        if (!bookings.isEmpty()) {
+                            showBookings(bookings);
+                        } else {
+                            showNoBookings();
+                        }
                     } else {
+                        Log.e(TAG, "API mengembalikan error: " + apiResponse.getError());
                         showNoBookings();
                     }
                 } else {
-                    Log.e(TAG, "Failed to load bookings: " + response.message());
+                    Log.e(TAG, "Gagal memuat booking: " + response.message());
                     showNoBookings();
                 }
             }
 
             @Override
-            public void onFailure(Call<BookingListResponse> call, Throwable t) {
-                Log.e(TAG, "Network error: " + t.getMessage());
+            public void onFailure(Call<ApiResponse<List<Booking>>> call, Throwable t) {
+                Log.e(TAG, "Error jaringan: " + t.getMessage());
                 Toast.makeText(requireContext(), "Error koneksi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 showNoBookings();
             }

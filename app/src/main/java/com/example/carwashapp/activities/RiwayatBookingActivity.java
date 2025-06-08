@@ -15,9 +15,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.carwashapp.R;
+import com.example.carwashapp.adapters.RiwayatBookingAdapter;
 import com.example.carwashapp.api.ApiService;
+import com.example.carwashapp.models.ApiResponse;
 import com.example.carwashapp.models.Booking;
-import com.example.carwashapp.models.BookingListResponse;
 import com.example.carwashapp.utils.ApiClient;
 import com.example.carwashapp.utils.SessionManager;
 
@@ -57,7 +58,7 @@ public class RiwayatBookingActivity extends AppCompatActivity {
         btnGoToBooking = findViewById(R.id.btnGoToBooking);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        apiService = ApiClient.getApiService(getApplicationContext());
+        apiService = ApiClient.getApiService();
         sessionManager = new SessionManager(this);
 
         btnRetry.setOnClickListener(v -> loadBookings());
@@ -94,102 +95,61 @@ public class RiwayatBookingActivity extends AppCompatActivity {
     }
 
     private void loadBookings() {
-        Log.d(TAG, "Loading bookings...");
+        Log.d(TAG, "Memuat booking...");
         showLoading(true);
         hideEmptyState();
 
-        // Try user-specific endpoint first
-        String userId = sessionManager.getUserId();
-        if (userId != null && !userId.isEmpty()) {
-            Log.d(TAG, "Trying user-specific endpoint for user: " + userId);
-            apiService.getUserBookings(userId).enqueue(new Callback<BookingListResponse>() {
-                @Override
-                public void onResponse(Call<BookingListResponse> call, Response<BookingListResponse> response) {
-                    handleBookingResponse(response, true);
-                }
-
-                @Override
-                public void onFailure(Call<BookingListResponse> call, Throwable t) {
-                    Log.w(TAG, "User-specific endpoint failed, trying general endpoint: " + t.getMessage());
-                    tryGeneralBookingsEndpoint();
-                }
-            });
-        } else {
-            Log.d(TAG, "No user ID available, trying general endpoint");
-            tryGeneralBookingsEndpoint();
+        String token = sessionManager.getToken();
+        if (token == null || token.isEmpty()) {
+            Log.w(TAG, "Token tidak tersedia");
+            showError("Token tidak valid, silakan login ulang");
+            return;
         }
-    }
 
-    private void tryGeneralBookingsEndpoint() {
-        apiService.getBookings().enqueue(new Callback<BookingListResponse>() {
+        Log.d(TAG, "Menggunakan endpoint user bookings dengan token");
+        apiService.getUserBookings(ApiClient.createAuthHeader(token)).enqueue(new Callback<ApiResponse<List<Booking>>>() {
             @Override
-            public void onResponse(Call<BookingListResponse> call, Response<BookingListResponse> response) {
-                handleBookingResponse(response, false);
+            public void onResponse(Call<ApiResponse<List<Booking>>> call, Response<ApiResponse<List<Booking>>> response) {
+                showLoading(false);
+                Log.d(TAG, "Response diterima. Code: " + response.code());
+
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<List<Booking>> apiResponse = response.body();
+                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
+                        List<Booking> bookings = apiResponse.getData();
+                        if (!bookings.isEmpty()) {
+                            Log.d(TAG, "Berhasil memuat " + bookings.size() + " booking");
+                            adapter = new RiwayatBookingAdapter(bookings);
+                            recyclerView.setAdapter(adapter);
+                            hideEmptyState();
+                        } else {
+                            Log.d(TAG, "Tidak ada booking ditemukan");
+                            showEmptyState("Belum ada riwayat booking.\nSilakan buat booking terlebih dahulu.");
+                        }
+                    } else {
+                        Log.e(TAG, "API mengembalikan error: " + apiResponse.getError());
+                        showError("Gagal memuat data: " + apiResponse.getError());
+                    }
+                } else {
+                    Log.e(TAG, "API call gagal dengan code: " + response.code() + ", message: " + response.message());
+                    if (response.code() == 401) {
+                        handleUnauthorized();
+                    } else {
+                        showError("Gagal memuat data: " + response.message() + " (Code: " + response.code() + ")");
+                    }
+                }
             }
 
             @Override
-            public void onFailure(Call<BookingListResponse> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<List<Booking>>> call, Throwable t) {
                 showLoading(false);
-                Log.e(TAG, "Network error: " + t.getMessage(), t);
+                Log.e(TAG, "Error jaringan: " + t.getMessage(), t);
                 showError("Koneksi bermasalah: " + t.getMessage());
             }
         });
     }
 
-    private void handleBookingResponse(Response<BookingListResponse> response, boolean isUserSpecific) {
-        showLoading(false);
-        String endpointType = isUserSpecific ? "user-specific" : "general";
-        Log.d(TAG, "API Response received from " + endpointType + " endpoint. Code: " + response.code());
 
-        if (response.isSuccessful()) {
-            BookingListResponse bookingResponse = response.body();
-            if (bookingResponse != null) {
-                List<Booking> bookings = bookingResponse.getData();
-                if (bookings != null && !bookings.isEmpty()) {
-                    Log.d(TAG, "Successfully loaded " + bookings.size() + " bookings from " + endpointType + " endpoint");
-                    adapter = new RiwayatBookingAdapter(bookings);
-                    recyclerView.setAdapter(adapter);
-                    hideEmptyState();
-                } else {
-                    Log.d(TAG, "No bookings found from " + endpointType + " endpoint");
-                    if (isUserSpecific) {
-                        // If user-specific endpoint returns empty, try general endpoint
-                        Log.d(TAG, "User-specific endpoint returned empty, trying general endpoint");
-                        tryGeneralBookingsEndpoint();
-                    } else {
-                        showEmptyState("Belum ada riwayat booking.\nSilakan buat booking terlebih dahulu.");
-                    }
-                }
-            } else {
-                Log.e(TAG, "Response body is null from " + endpointType + " endpoint");
-                if (isUserSpecific) {
-                    Log.d(TAG, "User-specific endpoint returned null body, trying general endpoint");
-                    tryGeneralBookingsEndpoint();
-                } else {
-                    showError("Data tidak valid dari server");
-                }
-            }
-        } else {
-            Log.e(TAG, "API call failed from " + endpointType + " endpoint with code: " + response.code() + ", message: " + response.message());
-            if (response.code() == 401) {
-                handleUnauthorized();
-            } else if (response.code() == 404) {
-                if (isUserSpecific) {
-                    Log.d(TAG, "User-specific endpoint not found, trying general endpoint");
-                    tryGeneralBookingsEndpoint();
-                } else {
-                    showEmptyState("Endpoint tidak ditemukan");
-                }
-            } else {
-                if (isUserSpecific) {
-                    Log.d(TAG, "User-specific endpoint failed, trying general endpoint");
-                    tryGeneralBookingsEndpoint();
-                } else {
-                    showError("Gagal memuat data: " + response.message() + " (Code: " + response.code() + ")");
-                }
-            }
-        }
-    }
 
     private void showLoading(boolean show) {
         progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
@@ -217,7 +177,7 @@ public class RiwayatBookingActivity extends AppCompatActivity {
     }
 
     private void handleUnauthorized() {
-        Log.w(TAG, "Unauthorized access, clearing session");
+        Log.w(TAG, "Akses tidak diizinkan, membersihkan sesi");
         Toast.makeText(this, "Sesi telah berakhir, silakan login ulang", Toast.LENGTH_LONG).show();
         sessionManager.logoutUser();
         Intent intent = new Intent(this, LoginActivity.class);
@@ -229,7 +189,7 @@ public class RiwayatBookingActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         // Refresh data ketika user kembali ke halaman ini
-        Log.d(TAG, "onResume - refreshing booking data");
+        Log.d(TAG, "onResume - memuat ulang data booking");
         loadBookings();
     }
 }

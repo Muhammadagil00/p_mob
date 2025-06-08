@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.carwashapp.R;
 import com.example.carwashapp.api.ApiService;
+import com.example.carwashapp.models.ApiResponse;
+import com.example.carwashapp.models.RegisterRequest;
 import com.example.carwashapp.models.User;
 import com.example.carwashapp.utils.ApiClient;
 import com.google.android.material.textfield.TextInputEditText;
@@ -39,7 +41,7 @@ public class RegisterActivity extends AppCompatActivity {
         btnRegister = findViewById(R.id.btn_register);
         tvLogin = findViewById(R.id.tv_login);
 
-        apiService = ApiClient.getApiService(getApplicationContext());
+        apiService = ApiClient.getApiService();
 
         btnRegister.setOnClickListener(v -> registerUser());
 
@@ -67,21 +69,27 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        User user = new User(name, email, password);
+        RegisterRequest registerRequest = new RegisterRequest(name, email, password);
 
-        apiService.registerUser(user).enqueue(new Callback<User>() {
+        apiService.registerUser(registerRequest).enqueue(new Callback<ApiResponse<User>>() {
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                if (response.isSuccessful()){
-                    Toast.makeText(RegisterActivity.this, "Registrasi berhasil! Silakan login.", Toast.LENGTH_LONG).show();
-                    finish();
+            public void onResponse(Call<ApiResponse<User>> call, Response<ApiResponse<User>> response) {
+                if (response.isSuccessful() && response.body() != null){
+                    ApiResponse<User> apiResponse = response.body();
+                    if (apiResponse.isSuccess()) {
+                        Toast.makeText(RegisterActivity.this, "Registrasi berhasil! Silakan login.", Toast.LENGTH_LONG).show();
+                        finish();
+                    } else {
+                        String errorMessage = apiResponse.getError() != null ? apiResponse.getError() : "Registrasi gagal";
+                        Toast.makeText(RegisterActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                    }
                 } else {
                     Toast.makeText(RegisterActivity.this, "Registrasi gagal: Email sudah terdaftar.", Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
+            public void onFailure(Call<ApiResponse<User>> call, Throwable t) {
                 Toast.makeText(RegisterActivity.this, "Gagal mendaftar: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
