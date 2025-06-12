@@ -50,7 +50,6 @@ public class ProfileFragment extends Fragment {
         btnNewBooking = view.findViewById(R.id.btnNewBooking);
         btnSettings = view.findViewById(R.id.btnSettings);
         btnVehicles = view.findViewById(R.id.btnVehicles);
-        btnTransactions = view.findViewById(R.id.btnTransactions);
         btnReviews = view.findViewById(R.id.btnReviews);
         btnBookingHistory = view.findViewById(R.id.btnBookingHistory);
         btnLogout = view.findViewById(R.id.btnLogout);

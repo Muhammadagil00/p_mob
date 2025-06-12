@@ -3,6 +3,7 @@ package com.example.carwashapp.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -71,27 +72,71 @@ public class RegisterActivity extends AppCompatActivity {
 
         RegisterRequest registerRequest = new RegisterRequest(name, email, password);
 
+        Log.d("RegisterActivity", "Attempting registration with email: " + email);
+        Log.d("RegisterActivity", "API Base URL: " + ApiClient.getBaseUrl());
+
         apiService.registerUser(registerRequest).enqueue(new Callback<ApiResponse<User>>() {
             @Override
             public void onResponse(Call<ApiResponse<User>> call, Response<ApiResponse<User>> response) {
-                if (response.isSuccessful() && response.body() != null){
-                    ApiResponse<User> apiResponse = response.body();
-                    if (apiResponse.isSuccess()) {
-                        Toast.makeText(RegisterActivity.this, "Registrasi berhasil! Silakan login.", Toast.LENGTH_LONG).show();
+                Log.d("RegisterActivity", "Register response received. Code: " + response.code());
+
+                if (response.isSuccessful()) {
+                    // Check for successful HTTP status codes (200, 201, etc.)
+                    if (response.code() == 201 || response.code() == 200) {
+                        Log.d("RegisterActivity", "✅ Registration successful with HTTP " + response.code());
+                        Toast.makeText(RegisterActivity.this, "✅ Registrasi berhasil! Silakan login.", Toast.LENGTH_LONG).show();
                         finish();
+                        return;
+                    }
+
+                    // Try to parse standard ApiResponse format
+                    if (response.body() != null) {
+                        ApiResponse<User> apiResponse = response.body();
+                        Log.d("RegisterActivity", "ApiResponse isSuccess: " + apiResponse.isSuccess());
+                        if (apiResponse.isSuccess()) {
+                            Log.d("RegisterActivity", "✅ Registration successful via ApiResponse");
+                            Toast.makeText(RegisterActivity.this, "✅ Registrasi berhasil! Silakan login.", Toast.LENGTH_LONG).show();
+                            finish();
+                        } else {
+                            String errorMessage = apiResponse.getError() != null ? apiResponse.getError() : "Registrasi gagal";
+                            Log.d("RegisterActivity", "❌ Registration failed via ApiResponse: " + errorMessage);
+                            Toast.makeText(RegisterActivity.this, "❌ " + errorMessage, Toast.LENGTH_LONG).show();
+                        }
                     } else {
-                        String errorMessage = apiResponse.getError() != null ? apiResponse.getError() : "Registrasi gagal";
-                        Toast.makeText(RegisterActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                        Log.d("RegisterActivity", "✅ Registration successful (empty response body)");
+                        Toast.makeText(RegisterActivity.this, "✅ Registrasi berhasil! Silakan login.", Toast.LENGTH_LONG).show();
+                        finish();
                     }
                 } else {
-                    Toast.makeText(RegisterActivity.this, "Registrasi gagal: Email sudah terdaftar.", Toast.LENGTH_LONG).show();
+                    // Handle HTTP error codes
+                    Log.e("RegisterActivity", "❌ Registration failed with HTTP " + response.code());
+                    String errorMessage = getRegisterErrorMessage(response.code());
+                    Toast.makeText(RegisterActivity.this, errorMessage, Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse<User>> call, Throwable t) {
-                Toast.makeText(RegisterActivity.this, "Gagal mendaftar: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                Log.e("RegisterActivity", "❌ Registration network error: " + t.getMessage(), t);
+                Toast.makeText(RegisterActivity.this, "🌐 Gagal mendaftar: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private String getRegisterErrorMessage(int httpCode) {
+        switch (httpCode) {
+            case 400:
+                return "❌ Data registrasi tidak valid. Periksa kembali form Anda.";
+            case 409:
+                return "❌ Email sudah terdaftar. Gunakan email lain atau login.";
+            case 422:
+                return "❌ Format data tidak sesuai. Periksa email dan password.";
+            case 429:
+                return "⚠️ Terlalu banyak percobaan. Coba lagi dalam beberapa menit.";
+            case 500:
+                return "🔧 Server bermasalah. Silakan coba lagi nanti.";
+            default:
+                return "❌ Registrasi gagal (Kode: " + httpCode + "). Silakan coba lagi.";
+        }
     }
 }

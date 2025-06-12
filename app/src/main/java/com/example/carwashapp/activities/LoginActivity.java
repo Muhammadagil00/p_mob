@@ -117,20 +117,15 @@ public class LoginActivity extends AppCompatActivity {
                     // HTTP error (4xx, 5xx)
                     Log.e(TAG, "HTTP Error - Code: " + response.code() + ", Message: " + response.message());
 
-                    if (response.code() == 401) {
-                        Toast.makeText(LoginActivity.this, "Email atau password salah", Toast.LENGTH_SHORT).show();
-                    } else if (response.code() == 500) {
-                        Toast.makeText(LoginActivity.this, "Server bermasalah, coba lagi nanti", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(LoginActivity.this, "Login gagal (Error " + response.code() + ")", Toast.LENGTH_SHORT).show();
-                    }
+                    String errorMessage = getLoginErrorMessage(response.code());
+                    Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 Log.e(TAG, "Login network error: " + t.getMessage(), t);
-                Toast.makeText(LoginActivity.this, "Login gagal: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, "🌐 Koneksi bermasalah: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -150,9 +145,28 @@ public class LoginActivity extends AppCompatActivity {
                 token
         );
 
-        Toast.makeText(LoginActivity.this, "Login berhasil! Selamat datang " + loggedInUser.getName(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(LoginActivity.this, "✅ Login berhasil! Selamat datang " + loggedInUser.getName(), Toast.LENGTH_SHORT).show();
         startActivity(new Intent(LoginActivity.this, MainActivity.class));
         finish();
+    }
+
+    private String getLoginErrorMessage(int httpCode) {
+        switch (httpCode) {
+            case 400:
+                return "❌ Data login tidak valid. Periksa email dan password.";
+            case 401:
+                return "❌ Email atau password salah. Silakan coba lagi.";
+            case 403:
+                return "🚫 Akun Anda diblokir. Hubungi administrator.";
+            case 404:
+                return "❓ Akun tidak ditemukan. Silakan daftar terlebih dahulu.";
+            case 429:
+                return "⚠️ Terlalu banyak percobaan login. Coba lagi dalam beberapa menit.";
+            case 500:
+                return "🔧 Server bermasalah. Silakan coba lagi nanti.";
+            default:
+                return "❌ Login gagal (Kode: " + httpCode + "). Silakan coba lagi.";
+        }
     }
 
     private void testApiConnection() {

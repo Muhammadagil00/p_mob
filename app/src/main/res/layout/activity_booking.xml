@@ -154,7 +154,7 @@
                         android:id="@+id/etDate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Tanggal"
+                        android:hint="Pilih Tanggal (DD/MM/YYYY)"
                         android:focusable="false"
                         android:clickable="true"
                         android:drawableStart="@android:drawable/ic_menu_my_calendar"
@@ -176,7 +176,7 @@
                         android:id="@+id/etTime"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Jam"
+                        android:hint="Pilih Jam (HH:MM)"
                         android:focusable="false"
                         android:clickable="true"
                         android:drawableStart="@android:drawable/ic_menu_recent_history"
@@ -207,7 +207,7 @@
                     android:id="@+id/etLocation"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Masukkan alamat lengkap"
+                    android:hint="Alamat lengkap (min. 5 karakter)&#10;Contoh: Jl. Sudirman No. 123, Jakarta"
                     android:minLines="2"
                     android:gravity="top"
                     android:drawableStart="@android:drawable/ic_dialog_map"
@@ -276,7 +276,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="• Pastikan kendaraan dalam kondisi mudah diakses\n• Tim akan datang sesuai jadwal yang dipilih\n• Pembayaran dapat dilakukan setelah layanan selesai"
+                android:text="• Lokasi harus diisi minimal 5 karakter\n• Pastikan kendaraan dalam kondisi mudah diakses\n• Tim akan datang sesuai jadwal yang dipilih\n• Pembayaran dapat dilakukan setelah layanan selesai"
                 style="@style/TextBody"
                 android:lineSpacingExtra="4dp" />
 

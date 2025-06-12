@@ -25,7 +25,7 @@
                 android:layout_height="wrap_content"
                 android:text="Selamat datang, Admin"
                 android:textColor="#FFFFFF"
-                android:textSize="24sp"
+                android:textSize="18dp"
                 android:textStyle="bold"
                 android:layout_gravity="center" />
 

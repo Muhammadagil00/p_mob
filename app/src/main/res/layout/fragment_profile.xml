@@ -54,7 +54,6 @@
                 android:textColor="#FFFFFF"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:background="#4CAF50"
                 android:paddingLeft="12dp"
                 android:paddingRight="12dp"
                 android:paddingTop="4dp"
@@ -77,6 +76,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:text="Aksi Cepat"
                 android:textSize="20sp"
                 android:textStyle="bold"
@@ -114,7 +114,7 @@
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:src="@android:drawable/ic_menu_send" />
+                    android:src="@drawable/ic_menu_send2" />
 
             </LinearLayout>
 
@@ -123,7 +123,7 @@
                 android:id="@+id/btnVehicles"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_button_secondary"
+                android:background="@drawable/bg_button_primary"
                 android:orientation="horizontal"
                 android:padding="16dp"
                 android:gravity="center_vertical"
@@ -142,58 +142,26 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Kelola Kendaraan"
-                    android:textColor="#2196F3"
+                    android:textColor="#FFF"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:src="@android:drawable/ic_menu_send" />
+                    android:src="@drawable/ic_menu_send2" />
 
             </LinearLayout>
 
             <!-- Transactions Button -->
-            <LinearLayout
-                android:id="@+id/btnTransactions"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_button_secondary"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="12dp"
-                android:clickable="true"
-                android:focusable="true">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_send"
-                    android:layout_marginEnd="16dp" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Riwayat Transaksi"
-                    android:textColor="#2196F3"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@android:drawable/ic_menu_send" />
-
-            </LinearLayout>
 
             <!-- Reviews Button -->
             <LinearLayout
                 android:id="@+id/btnReviews"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_button_secondary"
+                android:background="@drawable/bg_button_primary"
                 android:orientation="horizontal"
                 android:padding="16dp"
                 android:gravity="center_vertical"
@@ -204,7 +172,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_send"
+                    android:src="@drawable/ic_menu_send2"
                     android:layout_marginEnd="16dp" />
 
                 <TextView
@@ -212,14 +180,14 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Review &amp; Rating"
-                    android:textColor="#2196F3"
+                    android:textColor="#FFF"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:src="@android:drawable/ic_menu_send" />
+                    android:src="@drawable/ic_menu_send2" />
 
             </LinearLayout>
 
@@ -228,7 +196,7 @@
                 android:id="@+id/btnBookingHistory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_button_secondary"
+                android:background="@drawable/bg_button_primary"
                 android:orientation="horizontal"
                 android:padding="16dp"
                 android:gravity="center_vertical"
@@ -247,14 +215,14 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Riwayat Booking"
-                    android:textColor="#2196F3"
+                    android:textColor="#FFF"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:src="@android:drawable/ic_menu_send" />
+                    android:src="@drawable/ic_menu_send2" />
 
             </LinearLayout>
 
@@ -263,7 +231,7 @@
                 android:id="@+id/btnSettings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_button_secondary"
+                android:background="@drawable/bg_button_primary"
                 android:orientation="horizontal"
                 android:padding="16dp"
                 android:gravity="center_vertical"
@@ -282,14 +250,14 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Pengaturan"
-                    android:textColor="#2196F3"
+                    android:textColor="#FFF"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:src="@android:drawable/ic_menu_send" />
+                    android:src="@drawable/ic_menu_send2" />
 
             </LinearLayout>
 
@@ -298,7 +266,6 @@
                 android:id="@+id/btnLogout"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:background="#F44336"
                 android:text="Logout"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
