@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.Carwashapp" parent="Theme.Material3.DayNight.NoActionBar">
@@ -18,24 +19,26 @@
     <!-- Custom Button Styles -->
     <style name="ButtonPrimary" parent="Widget.Material3.Button">
         <item name="android:background">@drawable/bg_button_primary</item>
-        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textColor">@color/text_white</item>
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:padding">16dp</item>
+        <item name="android:layout_margin">8dp</item>
         <item name="android:elevation">4dp</item>
     </style>
 
     <style name="ButtonSecondary" parent="Widget.Material3.Button.OutlinedButton">
         <item name="android:background">@drawable/bg_button_secondary</item>
-        <item name="android:textColor">#2196F3</item>
+        <item name="android:textColor">@color/primary_color</item>
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:padding">16dp</item>
+        <item name="android:layout_margin">8dp</item>
     </style>
 
     <!-- Card Style -->
     <style name="CardStyle">
-        <item name="android:background">@drawable/bg_card</item>
+        <item name="android:background">@color/card_background</item>
         <item name="android:padding">16dp</item>
         <item name="android:layout_margin">8dp</item>
         <item name="android:elevation">4dp</item>
@@ -45,22 +48,45 @@
     <style name="TextHeading1">
         <item name="android:textSize">28sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">#212121</item>
+        <item name="android:textColor">@color/text_primary</item>
     </style>
 
     <style name="TextHeading2">
         <item name="android:textSize">22sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">#212121</item>
+        <item name="android:textColor">@color/text_primary</item>
     </style>
 
     <style name="TextBody">
         <item name="android:textSize">16sp</item>
-        <item name="android:textColor">#212121</item>
+        <item name="android:textColor">@color/text_primary</item>
     </style>
 
     <style name="TextSecondary">
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">#757575</item>
+        <item name="android:textColor">@color/text_secondary</item>
     </style>
+
+    <!-- Additional Text Styles -->
+    <style name="TextHeading3">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <style name="TextBody1">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <style name="TextBody2">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <style name="TextCaption">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/text_hint</item>
+    </style>
+
 </resources>

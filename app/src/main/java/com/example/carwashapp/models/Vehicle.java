@@ -62,4 +62,8 @@ public class Vehicle {
     public String toString() {
         return brand + " " + model + " (" + plateNumber + ")";
     }
+
+    public void setLicensePlate(String s) {
+
+    }
 }

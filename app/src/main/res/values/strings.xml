@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">CarWash App</string>
 
@@ -64,4 +65,38 @@
     <string name="available_services">Layanan Tersedia</string>
     <string name="service_price_from">Mulai dari</string>
     <string name="manage_all_services">Manage semua layanan CarWash</string>
+
+    <!-- Transactions -->
+    <string name="transaction_history">Riwayat Transaksi</string>
+    <string name="add_transaction">Tambah Transaksi</string>
+    <string name="transaction_amount">Jumlah Transaksi</string>
+    <string name="payment_method">Metode Pembayaran</string>
+    <string name="transaction_status">Status Transaksi</string>
+
+    <!-- Reviews -->
+    <string name="reviews_ratings">Review &amp; Rating</string>
+    <string name="add_review">Tambah Review</string>
+    <string name="rating">Rating</string>
+    <string name="comment">Komentar</string>
+    <string name="review_booking">Review untuk Booking</string>
+
+    <!-- Vehicles -->
+    <string name="manage_vehicles">Kelola Kendaraan</string>
+    <string name="add_vehicle">Tambah Kendaraan</string>
+    <string name="vehicle_brand">Merek Kendaraan</string>
+    <string name="vehicle_model">Model Kendaraan</string>
+    <string name="vehicle_year">Tahun</string>
+    <string name="vehicle_color">Warna</string>
+    <string name="vehicle_plate">Nomor Plat</string>
+    <string name="vehicle_type">Jenis Kendaraan</string>
+
+    <!-- Common -->
+    <string name="save">Simpan</string>
+    <string name="cancel">Batal</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Hapus</string>
+    <string name="no_data">Tidak ada data</string>
+    <string name="error_occurred">Terjadi kesalahan</string>
+    <string name="success">Berhasil</string>
+    <string name="failed">Gagal</string>
 </resources>

@@ -20,7 +20,8 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_car_wash"
+            android:src="@drawable/ic_car"
+            android:scaleType="centerInside"
             android:layout_marginBottom="12dp" />
 
         <!-- Service Name -->
@@ -53,28 +54,28 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
+            android:layout_marginTop="8px"
             android:background="#E3F2FD"
-            android:padding="8dp"
-            android:layout_marginTop="8dp">
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="1dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
                 android:text="Mulai dari"
-                android:textSize="12sp"
                 android:textColor="#1976D2"
-                android:layout_marginEnd="4dp" />
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/tvServicePrice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Rp 25.000"
+                android:textColor="#1976D2"
                 android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="#1976D2" />
+                android:textStyle="bold" />
 
         </LinearLayout>
 

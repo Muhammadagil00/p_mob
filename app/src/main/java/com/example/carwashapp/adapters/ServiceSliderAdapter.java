@@ -66,17 +66,23 @@ public class ServiceSliderAdapter extends RecyclerView.Adapter<ServiceSliderAdap
         // Set different icons based on service name
         if (serviceName != null) {
             String name = serviceName.toLowerCase();
-            if (name.contains("basic") || name.contains("cuci")) {
+            if (name.contains("basic") || name.contains("cuci mobil basic")) {
                 imageView.setImageResource(R.drawable.ic_car_wash);
             } else if (name.contains("premium") || name.contains("lengkap")) {
-                imageView.setImageResource(R.drawable.ic_car_wash);
+                imageView.setImageResource(R.drawable.ic_car_premium);
+            } else if (name.contains("motor") || name.contains("motorcycle")) {
+                imageView.setImageResource(R.drawable.ic_motorcycle);
+            } else if (name.contains("detailing") || name.contains("detail")) {
+                imageView.setImageResource(R.drawable.ic_detailing);
             } else if (name.contains("wax") || name.contains("poles")) {
+                imageView.setImageResource(R.drawable.ic_wax);
+            } else if (name.contains("cuci")) {
                 imageView.setImageResource(R.drawable.ic_car_wash);
             } else {
-                imageView.setImageResource(R.drawable.ic_car_wash);
+                imageView.setImageResource(R.drawable.ic_car);
             }
         } else {
-            imageView.setImageResource(R.drawable.ic_car_wash);
+            imageView.setImageResource(R.drawable.ic_car);
         }
     }
 

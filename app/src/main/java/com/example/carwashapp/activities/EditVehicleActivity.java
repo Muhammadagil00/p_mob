@@ -13,6 +13,7 @@ import com.example.carwashapp.R;
 import com.example.carwashapp.api.ApiService;
 import com.example.carwashapp.models.ApiResponse;
 import com.example.carwashapp.models.Vehicle;
+import com.example.carwashapp.models.VehicleRequest;
 import com.example.carwashapp.utils.ApiClient;
 import com.example.carwashapp.utils.SessionManager;
 import com.google.android.material.textfield.TextInputEditText;
@@ -153,8 +154,9 @@ public class EditVehicleActivity extends AppCompatActivity {
         }
 
         Vehicle vehicle = new Vehicle(brand, model, year, color, plateNumber, vehicleType);
+        VehicleRequest vehicleRequest = VehicleRequest.fromVehicle(vehicle);
 
-        apiService.updateVehicle(ApiClient.createAuthHeader(token), vehicleId, vehicle).enqueue(new Callback<ApiResponse<Vehicle>>() {
+        apiService.updateVehicle(ApiClient.createAuthHeader(token), vehicleId, vehicleRequest).enqueue(new Callback<ApiResponse<Vehicle>>() {
             @Override
             public void onResponse(Call<ApiResponse<Vehicle>> call, Response<ApiResponse<Vehicle>> response) {
                 if (response.isSuccessful() && response.body() != null) {

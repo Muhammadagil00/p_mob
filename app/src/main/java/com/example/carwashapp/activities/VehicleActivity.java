@@ -15,9 +15,12 @@ import com.example.carwashapp.R;
 import com.example.carwashapp.adapters.VehicleAdapter;
 import com.example.carwashapp.api.ApiService;
 import com.example.carwashapp.models.ApiResponse;
+import com.example.carwashapp.models.ApiResponseWrapper;
 import com.example.carwashapp.models.Vehicle;
 import com.example.carwashapp.utils.ApiClient;
 import com.example.carwashapp.utils.SessionManager;
+
+import okhttp3.ResponseBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +72,54 @@ public class VehicleActivity extends AppCompatActivity {
             return;
         }
 
+        // Try alternative endpoint first
+        loadVehiclesAlternative(token);
+    }
+
+    private void loadVehiclesAlternative(String token) {
+        apiService.getVehiclesRaw(ApiClient.createAuthHeader(token)).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    if (response.isSuccessful() && response.body() != null) {
+                        String jsonResponse = response.body().string();
+
+                        // Parse using flexible wrapper
+                        List<Vehicle> vehicles = ApiResponseWrapper.parseListResponse(jsonResponse, Vehicle.class);
+                        boolean isSuccess = ApiResponseWrapper.isSuccessResponse(jsonResponse);
+
+                        if (isSuccess && vehicles != null) {
+                            vehicleList = vehicles;
+                            vehicleAdapter = new VehicleAdapter(vehicleList);
+                            vehicleAdapter.setOnVehicleClickListener(vehicle -> {
+                                Intent intent = new Intent(VehicleActivity.this, AddVehicleActivity.class);
+                                intent.putExtra("edit_mode", true);
+                                intent.putExtra("vehicle_id", vehicle.getId());
+                                startActivity(intent);
+                            });
+                            rvVehicles.setAdapter(vehicleAdapter);
+                        } else {
+                            Toast.makeText(VehicleActivity.this, "Gagal memuat kendaraan", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        // Fallback to original endpoint
+                        loadVehiclesOriginal(token);
+                    }
+                } catch (Exception e) {
+                    // Fallback to original endpoint
+                    loadVehiclesOriginal(token);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                // Fallback to original endpoint
+                loadVehiclesOriginal(token);
+            }
+        });
+    }
+
+    private void loadVehiclesOriginal(String token) {
         apiService.getVehicles(ApiClient.createAuthHeader(token)).enqueue(new Callback<ApiResponse<List<Vehicle>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Vehicle>>> call, Response<ApiResponse<List<Vehicle>>> response) {
@@ -79,7 +130,8 @@ public class VehicleActivity extends AppCompatActivity {
                         vehicleAdapter = new VehicleAdapter(vehicleList);
                         vehicleAdapter.setOnVehicleClickListener(vehicle -> {
                             // Handle vehicle click for editing
-                            Intent intent = new Intent(VehicleActivity.this, EditVehicleActivity.class);
+                            Intent intent = new Intent(VehicleActivity.this, AddVehicleActivity.class);
+                            intent.putExtra("edit_mode", true);
                             intent.putExtra("vehicle_id", vehicle.getId());
                             startActivity(intent);
                         });

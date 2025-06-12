@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,7 +35,7 @@ public class BookingFragment extends Fragment {
     private SessionManager sessionManager;
     private ApiService apiService;
     private RecyclerView rvBookings;
-    private TextView tvNoBookings;
+    private LinearLayout tvNoBookings;
     private RiwayatBookingAdapter bookingAdapter;
 
     @Nullable

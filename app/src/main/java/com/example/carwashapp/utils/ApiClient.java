@@ -56,4 +56,8 @@ public class ApiClient {
     public static String createAuthHeader(String token) {
         return "Bearer " + token;
     }
+
+    public static String getBaseUrl() {
+        return BASE_URL;
+    }
 }

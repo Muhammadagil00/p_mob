@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Primary Colors -->
     <color name="primary_color">#2196F3</color>
@@ -7,6 +8,7 @@
 
     <!-- Background Colors -->
     <color name="background_color">#F8F9FA</color>
+    <color name="background_light">#F8F9FA</color>
     <color name="surface_color">#FFFFFF</color>
     <color name="card_background">#FFFFFF</color>
 
@@ -40,4 +42,10 @@
     <color name="gray_dark">#424242</color>
     <color name="gray_medium">#757575</color>
     <color name="gray_light">#BDBDBD</color>
+
+    <!-- Status Colors -->
+    <color name="green">#4CAF50</color>
+    <color name="red">#F44336</color>
+    <color name="orange">#FF9800</color>
+    <color name="blue">#2196F3</color>
 </resources>

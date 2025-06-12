@@ -17,6 +17,8 @@ public class Booking {
     private Service service;
     private Vehicle vehicle;
     private User user;
+    private Transaction transaction;
+    private Review review;
 
     public Booking() {}
 
@@ -71,4 +73,26 @@ public class Booking {
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
+
+    public Transaction getTransaction() { return transaction; }
+    public void setTransaction(Transaction transaction) { this.transaction = transaction; }
+
+    public Review getReview() { return review; }
+    public void setReview(Review review) { this.review = review; }
+
+    @Override
+    public String toString() {
+        return "Booking{" +
+                "id='" + id + '\'' +
+                ", serviceId='" + serviceId + '\'' +
+                ", vehicleId='" + vehicleId + '\'' +
+                ", date='" + date + '\'' +
+                ", timeSlot='" + timeSlot + '\'' +
+                ", location='" + location + '\'' +
+                ", status='" + status + '\'' +
+                ", notes='" + notes + '\'' +
+                ", service=" + (service != null ? service.getName() : "null") +
+                ", vehicle=" + (vehicle != null ? vehicle.getBrand() + " " + vehicle.getModel() : "null") +
+                '}';
+    }
 }

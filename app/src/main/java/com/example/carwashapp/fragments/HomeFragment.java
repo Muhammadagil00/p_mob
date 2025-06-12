@@ -19,6 +19,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.carwashapp.R;
 import com.example.carwashapp.activities.BookingActivity;
 import com.example.carwashapp.activities.MainActivity;
+import com.example.carwashapp.activities.RiwayatBookingActivity;
+import com.example.carwashapp.activities.ReviewActivity;
 import com.example.carwashapp.adapters.ServiceSliderAdapter;
 import com.example.carwashapp.api.ApiService;
 import com.example.carwashapp.models.ApiResponse;
@@ -38,7 +40,7 @@ public class HomeFragment extends Fragment {
     private SessionManager sessionManager;
     private ApiService apiService;
     private TextView tvWelcome;
-    private LinearLayout btnGoBooking, btnGoHistory;
+    private LinearLayout btnGoBooking, btnGoHistory, btnGoReview;
     private RecyclerView rvServices;
     private ServiceSliderAdapter serviceAdapter;
 
@@ -60,6 +62,7 @@ public class HomeFragment extends Fragment {
         tvWelcome = view.findViewById(R.id.tv_welcome);
         btnGoBooking = view.findViewById(R.id.btnGoBooking);
         btnGoHistory = view.findViewById(R.id.btnGoHistory);
+        btnGoReview = view.findViewById(R.id.btnGoReview);
         rvServices = view.findViewById(R.id.rvServices);
 
         // Set welcome message
@@ -84,10 +87,15 @@ public class HomeFragment extends Fragment {
 
         if (btnGoHistory != null) {
             btnGoHistory.setOnClickListener(v -> {
-                // Navigate to booking tab
-                if (getActivity() instanceof MainActivity) {
-                    ((MainActivity) getActivity()).navigateToBooking();
-                }
+                Intent intent = new Intent(requireContext(), RiwayatBookingActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        if (btnGoReview != null) {
+            btnGoReview.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), ReviewActivity.class);
+                startActivity(intent);
             });
         }
     }

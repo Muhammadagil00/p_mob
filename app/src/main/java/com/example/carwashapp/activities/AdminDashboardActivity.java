@@ -10,14 +10,20 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.carwashapp.R;
+import com.example.carwashapp.adapters.AdminBookingAdapter;
+import com.example.carwashapp.adapters.DashboardBookingAdapter;
+import com.example.carwashapp.adapters.RiwayatBookingAdapter;
 import com.example.carwashapp.api.ApiService;
 import com.example.carwashapp.models.ApiResponse;
 import com.example.carwashapp.models.Booking;
+import com.example.carwashapp.models.BookingResponse;
+import com.example.carwashapp.models.UpdateBookingStatusRequest;
 import com.example.carwashapp.utils.ApiClient;
 import com.example.carwashapp.utils.SessionManager;
 
@@ -35,10 +41,12 @@ public class AdminDashboardActivity extends AppCompatActivity {
     private ApiService apiService;
     private TextView tvWelcomeAdmin;
     private TextView tvTotalBookings;
+    private TextView tvBookingStatus;
     private Button btnManageServices;
     private Button btnViewAllBookings;
     private Button btnLogout;
-    private RecyclerView rvRecentBookings;
+    private Button btnRefreshDashboard;
+    // RecyclerView removed - booking data moved to AdminAllBookingsActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,19 +64,18 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
         tvWelcomeAdmin = findViewById(R.id.tvWelcomeAdmin);
         tvTotalBookings = findViewById(R.id.tvTotalBookings);
+        tvBookingStatus = findViewById(R.id.tvBookingStatus);
         btnManageServices = findViewById(R.id.btnManageServices);
         btnViewAllBookings = findViewById(R.id.btnViewAllBookings);
         btnLogout = findViewById(R.id.btnLogout);
-        rvRecentBookings = findViewById(R.id.rvRecentBookings);
+        btnRefreshDashboard = findViewById(R.id.btnRefreshDashboard);
+        // rvRecentBookings removed from dashboard - data moved to AdminAllBookingsActivity
 
         // Set welcome message
         String adminName = sessionManager.getUserName();
         tvWelcomeAdmin.setText("Selamat datang, Admin " + adminName);
 
-        // Setup RecyclerView
-        if (rvRecentBookings != null) {
-            rvRecentBookings.setLayoutManager(new LinearLayoutManager(this));
-        }
+        // RecyclerView removed - booking data moved to AdminAllBookingsActivity
 
         // Set click listeners
         btnManageServices.setOnClickListener(v -> {
@@ -77,11 +84,17 @@ public class AdminDashboardActivity extends AppCompatActivity {
         });
 
         btnViewAllBookings.setOnClickListener(v -> {
-            Intent intent = new Intent(this, RiwayatBookingActivity.class);
+            Intent intent = new Intent(this, AdminAllBookingsActivity.class);
             startActivity(intent);
         });
 
         btnLogout.setOnClickListener(v -> logout());
+
+        btnRefreshDashboard.setOnClickListener(v -> {
+            Log.d(TAG, "🔄 Manual refresh triggered by admin");
+            tvBookingStatus.setText("Memuat ulang data...");
+            refreshDashboardData();
+        });
     }
 
     private void checkAdminAccess() {
@@ -98,81 +111,363 @@ public class AdminDashboardActivity extends AppCompatActivity {
     }
 
     private void loadRecentBookings() {
-        String token = sessionManager.getToken();
-        if (token == null) {
-            Log.w(TAG, "Token tidak tersedia untuk admin");
-            loadDemoBookings();
-            return;
-        }
+        Log.d(TAG, "=== LOADING ADMIN DASHBOARD BOOKINGS ===");
 
-        apiService.getUserBookings(ApiClient.createAuthHeader(token)).enqueue(new Callback<ApiResponse<List<Booking>>>() {
+        try {
+            // Debug session info
+            debugSessionInfo();
+
+            String token = sessionManager.getToken();
+            if (token == null) {
+                Log.w(TAG, "❌ Token tidak tersedia untuk admin");
+                runOnUiThread(() -> {
+                    tvTotalBookings.setText("Total Booking: 0 (No Token)");
+                    Toast.makeText(AdminDashboardActivity.this,
+                        "❌ Token tidak valid. Silakan login ulang.", Toast.LENGTH_LONG).show();
+                });
+                return;
+            }
+
+            // Debug API call info
+            Log.d(TAG, "=== ADMIN DASHBOARD API DEBUG ===");
+            Log.d(TAG, "🌐 Base URL: " + ApiClient.getBaseUrl());
+            Log.d(TAG, "🎯 Full URL: " + ApiClient.getBaseUrl() + "api/admin/bookings");
+            Log.d(TAG, "🔑 Token length: " + token.length());
+            Log.d(TAG, "🔑 Token preview: " + (token.length() > 20 ? token.substring(0, 20) + "..." : token));
+            Log.d(TAG, "👤 User Role: " + sessionManager.getUserRole());
+            Log.d(TAG, "🔐 Is Admin: " + sessionManager.isAdmin());
+
+            // Validate admin status
+            if (!sessionManager.isAdmin()) {
+                Log.w(TAG, "⚠️ User is not admin but accessing admin dashboard");
+                runOnUiThread(() -> {
+                    Toast.makeText(AdminDashboardActivity.this,
+                        "⚠️ Akses admin diperlukan", Toast.LENGTH_LONG).show();
+                });
+            }
+
+            // Use admin nested endpoint to get all bookings for dashboard
+            Log.d(TAG, "🚀 Calling admin nested bookings API for dashboard");
+            apiService.getAdminBookingsNested(ApiClient.createAuthHeader(token)).enqueue(new Callback<BookingResponse>() {
             @Override
-            public void onResponse(Call<ApiResponse<List<Booking>>> call, Response<ApiResponse<List<Booking>>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<List<Booking>> apiResponse = response.body();
-                    if (apiResponse.isSuccess() && apiResponse.getData() != null) {
-                        List<Booking> bookings = apiResponse.getData();
-                        tvTotalBookings.setText("Total Booking: " + bookings.size());
+            public void onResponse(Call<BookingResponse> call, Response<BookingResponse> response) {
+                Log.d(TAG, "📥 Admin Nested Dashboard API Response Code: " + response.code());
 
-                        // Show only recent 5 bookings
-                        List<Booking> recentBookings = bookings.size() > 5 ?
-                            bookings.subList(0, 5) : bookings;
+                // Ensure UI updates happen on main thread
+                runOnUiThread(() -> {
+                    try {
+                        if (response.isSuccessful() && response.body() != null) {
+                            BookingResponse bookingResponse = response.body();
+                            if (bookingResponse.isSuccess() && bookingResponse.getData() != null &&
+                                bookingResponse.getData().getBookings() != null) {
 
-                        // For now, just show count - can add adapter later
-                        Toast.makeText(AdminDashboardActivity.this,
-                            "Berhasil memuat " + bookings.size() + " booking dari API", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Log.e(TAG, "API mengembalikan error: " + apiResponse.getError());
-                        tvTotalBookings.setText("Total Booking: 0");
-                        loadDemoBookings();
+                                List<Booking> bookings = bookingResponse.getData().getBookings();
+                                Log.d(TAG, "✅ Admin Dashboard: Berhasil memuat " + bookings.size() + " booking dari admin nested API");
+
+                                // Update total bookings with real data (no demo text)
+                                tvTotalBookings.setText("Total Booking: " + bookings.size());
+
+                                // Update status info only (no booking list on dashboard)
+                                updateBookingStatusInfo(bookings);
+
+                                // Show success message
+                                Toast.makeText(AdminDashboardActivity.this,
+                                    "✅ Dashboard memuat " + bookings.size() + " booking. Klik 'Lihat Semua' untuk detail.", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Log.w(TAG, "⚠️ Admin nested API response not successful: " + bookingResponse.getMessage());
+                                tvTotalBookings.setText("Total Booking: 0");
+                                updateBookingStatusInfo(new ArrayList<>());
+                                Toast.makeText(AdminDashboardActivity.this,
+                                    "⚠️ Tidak ada booking ditemukan", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Log.e(TAG, "❌ Admin Nested HTTP Error " + response.code() + ": " + response.message());
+
+                            // Try to read error body for more details
+                            String errorDetails = "";
+                            try {
+                                if (response.errorBody() != null) {
+                                    errorDetails = response.errorBody().string();
+                                    Log.e(TAG, "🚨 Admin Nested Error Body: " + errorDetails);
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error reading admin nested error body: " + e.getMessage());
+                            }
+
+                            // Try fallback endpoint with user nested structure
+                            Log.w(TAG, "🔄 Admin nested endpoint failed, trying user nested fallback...");
+                            tryUserBookingsForDashboard();
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "❌ Exception in admin nested onResponse UI update: " + e.getMessage(), e);
+                        showDashboardError("Error memproses admin response");
                     }
-                } else {
-                    Log.e(TAG, "Gagal memuat booking: " + response.message());
-                    loadDemoBookings();
-                }
+                });
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<List<Booking>>> call, Throwable t) {
-                Log.e(TAG, "Error jaringan: " + t.getMessage());
-                loadDemoBookings();
+            public void onFailure(Call<BookingResponse> call, Throwable t) {
+                Log.e(TAG, "=== ❌ ADMIN NESTED API NETWORK ERROR ===");
+                Log.e(TAG, "Error Type: " + t.getClass().getSimpleName());
+                Log.e(TAG, "Error Message: " + t.getMessage());
+                Log.e(TAG, "Cause: " + (t.getCause() != null ? t.getCause().getMessage() : "null"));
+
+                // Check specific error types
+                String errorType = "Network Error";
+                if (t instanceof java.net.UnknownHostException) {
+                    errorType = "DNS Error";
+                    Log.e(TAG, "🌐 DNS Resolution failed - Check internet connection");
+                } else if (t instanceof java.net.ConnectException) {
+                    errorType = "Connection Error";
+                    Log.e(TAG, "🔌 Connection failed - Server might be down");
+                } else if (t instanceof java.net.SocketTimeoutException) {
+                    errorType = "Timeout Error";
+                    Log.e(TAG, "⏰ Request timeout - Server too slow");
+                } else if (t instanceof javax.net.ssl.SSLException) {
+                    errorType = "SSL Error";
+                    Log.e(TAG, "🔒 SSL/TLS error - Certificate issue");
+                } else if (t instanceof IllegalStateException) {
+                    errorType = "State Error";
+                    Log.e(TAG, "🚨 IllegalStateException - UI thread issue");
+                } else if (t instanceof com.google.gson.JsonSyntaxException) {
+                    errorType = "JSON Parse Error";
+                    Log.e(TAG, "📝 JSON parsing failed - Response structure mismatch");
+                }
+
+                // Try fallback to user nested bookings endpoint
+                Log.w(TAG, "🔄 Admin nested endpoint failed, trying user nested endpoint as fallback...");
+                tryUserBookingsForDashboard();
+            }
+        });
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Exception in loadRecentBookings: " + e.getMessage(), e);
+            runOnUiThread(() -> {
+                showDashboardError("Error loading bookings: " + e.getMessage());
+            });
+        }
+    }
+
+    private void debugSessionInfo() {
+        try {
+            Log.d(TAG, "=== SESSION DEBUG INFO ===");
+            Log.d(TAG, "Is Logged In: " + sessionManager.isLoggedIn());
+            Log.d(TAG, "Is Admin: " + sessionManager.isAdmin());
+            Log.d(TAG, "User ID: " + sessionManager.getUserId());
+            Log.d(TAG, "User Name: " + sessionManager.getUserName());
+            Log.d(TAG, "User Role: " + sessionManager.getUserRole());
+            Log.d(TAG, "Token Available: " + (sessionManager.getToken() != null));
+
+            // Additional debugging
+            String token = sessionManager.getToken();
+            if (token != null) {
+                Log.d(TAG, "Token starts with: " + (token.length() > 10 ? token.substring(0, 10) + "..." : token));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error in debugSessionInfo: " + e.getMessage(), e);
+        }
+    }
+
+    private void tryUserBookingsForDashboard() {
+        Log.d(TAG, "=== 🔄 FALLBACK: Trying Nested User Bookings for Dashboard ===");
+        String token = sessionManager.getToken();
+        if (token == null) {
+            Log.e(TAG, "❌ Token is null in fallback");
+            runOnUiThread(() -> {
+                tvTotalBookings.setText("Total Booking: 0 (No Token)");
+                Toast.makeText(AdminDashboardActivity.this,
+                    "❌ Token tidak valid. Silakan login ulang.", Toast.LENGTH_LONG).show();
+            });
+            return;
+        }
+
+        // Try nested user bookings endpoint (matches server response structure)
+        Log.d(TAG, "🎯 Using nested endpoint: getUserBookingsNested");
+        apiService.getUserBookingsNested(ApiClient.createAuthHeader(token)).enqueue(new Callback<BookingResponse>() {
+            @Override
+            public void onResponse(Call<BookingResponse> call, Response<BookingResponse> response) {
+                Log.d(TAG, "📥 Nested Bookings Fallback Response Code: " + response.code());
+
+                runOnUiThread(() -> {
+                    try {
+                        if (response.isSuccessful() && response.body() != null) {
+                            BookingResponse bookingResponse = response.body();
+                            if (bookingResponse.isSuccess() && bookingResponse.getData() != null &&
+                                bookingResponse.getData().getBookings() != null) {
+
+                                List<Booking> bookings = bookingResponse.getData().getBookings();
+                                Log.d(TAG, "✅ Nested Fallback: Berhasil memuat " + bookings.size() + " booking");
+
+                                tvTotalBookings.setText("Total Booking: " + bookings.size());
+                                updateBookingStatusInfo(bookings);
+
+                                Toast.makeText(AdminDashboardActivity.this,
+                                    "✅ Dashboard memuat " + bookings.size() + " booking. Klik 'Lihat Semua' untuk detail.", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Log.w(TAG, "⚠️ Nested fallback API response not successful");
+                                showDashboardError("Tidak ada booking ditemukan");
+                            }
+                        } else {
+                            Log.e(TAG, "❌ Nested fallback HTTP Error " + response.code());
+
+                            // Try to read error body
+                            try {
+                                if (response.errorBody() != null) {
+                                    String errorBody = response.errorBody().string();
+                                    Log.e(TAG, "🚨 Nested Error Body: " + errorBody);
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error reading nested error body: " + e.getMessage());
+                            }
+
+                            showDashboardError("Error server: " + response.code());
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "❌ Exception in nested fallback UI update: " + e.getMessage(), e);
+                        showDashboardError("Error memproses data nested");
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call<BookingResponse> call, Throwable t) {
+                Log.e(TAG, "❌ Nested fallback network error: " + t.getMessage());
+                runOnUiThread(() -> {
+                    try {
+                        showDashboardError("Network Error (Nested): " + t.getMessage());
+                    } catch (Exception e) {
+                        Log.e(TAG, "❌ Exception in nested fallback error handling: " + e.getMessage(), e);
+                    }
+                });
             }
         });
     }
 
-    private void loadDemoBookings() {
-        // Create demo bookings for admin dashboard
-        List<Booking> demoBookings = new ArrayList<>();
+    private void showDashboardError(String message) {
+        try {
+            tvTotalBookings.setText("Total Booking: 0 (Error)");
+            if (tvBookingStatus != null) {
+                tvBookingStatus.setText("❌ Error: " + message);
+            }
+            Toast.makeText(AdminDashboardActivity.this,
+                "❌ " + message, Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Exception in showDashboardError: " + e.getMessage(), e);
+        }
+    }
 
-        Booking booking1 = new Booking();
-        booking1.setId("demo_booking_1");
-//        booking1.setServiceType("Cuci Mobil Basic");
-        booking1.setDate("2024-01-15");
-        booking1.setLocation("Jakarta Selatan");
-        booking1.setStatus("completed");
-        demoBookings.add(booking1);
+    // setupRecentBookingsWithActions method removed - booking data moved to AdminAllBookingsActivity
 
-        Booking booking2 = new Booking();
-        booking2.setId("demo_booking_2");
-//        booking2.setServiceType("Cuci Mobil Premium");
-        booking2.setDate("2024-01-14");
-        booking2.setLocation("Jakarta Pusat");
-        booking2.setStatus("in_progress");
-        demoBookings.add(booking2);
+    private void updateBookingStatusInfo(List<Booking> bookings) {
+        if (tvBookingStatus == null) return;
 
-        Booking booking3 = new Booking();
-        booking3.setId("demo_booking_3");
-//        booking3.setServiceType("Cuci Motor");
-        booking3.setDate("2024-01-13");
-        booking3.setLocation("Jakarta Utara");
-        booking3.setStatus("pending");
-        demoBookings.add(booking3);
+        if (bookings.isEmpty()) {
+            tvBookingStatus.setText("📋 Belum ada booking dari users");
+            return;
+        }
 
-        // Update total bookings
-        tvTotalBookings.setText("Total Booking: " + demoBookings.size() + " (Demo)");
+        // Count bookings by status
+        int pending = 0, processing = 0, done = 0, cancelled = 0;
 
-        // For now, just show text instead of RecyclerView
-        Toast.makeText(this, "Menampilkan " + demoBookings.size() + " booking demo", Toast.LENGTH_SHORT).show();
+        for (Booking booking : bookings) {
+            String status = booking.getStatus() != null ? booking.getStatus().toLowerCase() : "pending";
+            switch (status) {
+                case "pending": pending++; break;
+                case "processing": processing++; break;
+                case "done": done++; break;
+                case "cancelled": cancelled++; break;
+            }
+        }
+
+        // Create status summary
+        StringBuilder statusText = new StringBuilder();
+        statusText.append("📊 Total: ").append(bookings.size()).append(" booking");
+
+        if (pending > 0) statusText.append(" | ⏳ Pending: ").append(pending);
+        if (processing > 0) statusText.append(" | 🔄 Processing: ").append(processing);
+        if (done > 0) statusText.append(" | ✅ Done: ").append(done);
+        if (cancelled > 0) statusText.append(" | ❌ Cancelled: ").append(cancelled);
+
+        tvBookingStatus.setText(statusText.toString());
+    }
+
+    private void refreshDashboardData() {
+        Log.d(TAG, "🔄 Refreshing admin dashboard data...");
+        if (tvBookingStatus != null) {
+            tvBookingStatus.setText("🔄 Memuat ulang data...");
+        }
+        loadDashboardData();
+    }
+
+    // Admin action methods moved to AdminAllBookingsActivity
+
+    private void updateBookingStatusFromDashboard(Booking booking, String newStatus) {
+        Log.d(TAG, "=== UPDATING BOOKING STATUS FROM DASHBOARD ===");
+        Log.d(TAG, "Booking ID: " + booking.getId());
+        Log.d(TAG, "Current Status: " + booking.getStatus());
+        Log.d(TAG, "New Status: " + newStatus);
+
+        String token = sessionManager.getToken();
+        if (token == null) {
+            Log.e(TAG, "❌ Token is null, cannot update status");
+            Toast.makeText(this, "Token tidak valid", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Show loading
+        Toast.makeText(this, "Mengupdate status booking...", Toast.LENGTH_SHORT).show();
+
+        // Create request body
+        UpdateBookingStatusRequest request = new UpdateBookingStatusRequest(newStatus);
+
+        // Call admin endpoint for status update
+        apiService.updateBookingStatus(ApiClient.createAuthHeader(token), booking.getId(), request)
+            .enqueue(new Callback<ApiResponse<Booking>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<Booking>> call, Response<ApiResponse<Booking>> response) {
+                    Log.d(TAG, "📥 Update Status Response Code: " + response.code());
+
+                    if (response.isSuccessful() && response.body() != null) {
+                        ApiResponse<Booking> apiResponse = response.body();
+                        if (apiResponse.isSuccess()) {
+                            // Update local data and refresh dashboard
+                            booking.setStatus(newStatus);
+
+                            String statusText = getStatusDisplayText(newStatus);
+                            Toast.makeText(AdminDashboardActivity.this,
+                                "✅ Status booking berhasil diubah ke " + statusText, Toast.LENGTH_SHORT).show();
+
+                            // Refresh dashboard data
+                            loadDashboardData();
+                        } else {
+                            Log.e(TAG, "❌ API Error: " + apiResponse.getMessage());
+                            Toast.makeText(AdminDashboardActivity.this,
+                                "❌ Gagal mengupdate status: " + apiResponse.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Log.e(TAG, "❌ HTTP Error " + response.code() + ": " + response.message());
+                        Toast.makeText(AdminDashboardActivity.this,
+                            "❌ Error server: " + response.code(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ApiResponse<Booking>> call, Throwable t) {
+                    Log.e(TAG, "❌ Network error: " + t.getMessage());
+                    Toast.makeText(AdminDashboardActivity.this,
+                        "❌ Error jaringan: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+    }
+
+    private String getStatusDisplayText(String status) {
+        switch (status.toLowerCase()) {
+            case "pending": return "Menunggu Konfirmasi";
+            case "processing": return "Sedang Dikerjakan";
+            case "done": return "Cucian Selesai";
+            case "cancelled": return "Dibatalkan";
+            default: return "Status Tidak Diketahui";
+        }
     }
 
     private void logout() {

@@ -17,13 +17,17 @@ import androidx.fragment.app.Fragment;
 import com.example.carwashapp.R;
 import com.example.carwashapp.activities.BookingActivity;
 import com.example.carwashapp.activities.LoginActivity;
+import com.example.carwashapp.activities.RiwayatBookingActivity;
+import com.example.carwashapp.activities.TransactionActivity;
+import com.example.carwashapp.activities.ReviewActivity;
+import com.example.carwashapp.activities.VehicleActivity;
 import com.example.carwashapp.utils.SessionManager;
 
 public class ProfileFragment extends Fragment {
 
     private SessionManager sessionManager;
     private TextView tvUserName, tvUserEmail, tvUserRole;
-    private LinearLayout btnNewBooking, btnSettings;
+    private LinearLayout btnNewBooking, btnSettings, btnVehicles, btnTransactions, btnReviews, btnBookingHistory;
     private Button btnLogout;
 
     @Nullable
@@ -45,6 +49,10 @@ public class ProfileFragment extends Fragment {
         tvUserRole = view.findViewById(R.id.tvUserRole);
         btnNewBooking = view.findViewById(R.id.btnNewBooking);
         btnSettings = view.findViewById(R.id.btnSettings);
+        btnVehicles = view.findViewById(R.id.btnVehicles);
+        btnTransactions = view.findViewById(R.id.btnTransactions);
+        btnReviews = view.findViewById(R.id.btnReviews);
+        btnBookingHistory = view.findViewById(R.id.btnBookingHistory);
         btnLogout = view.findViewById(R.id.btnLogout);
 
         // Set click listeners
@@ -55,9 +63,31 @@ public class ProfileFragment extends Fragment {
             });
         }
 
+        if (btnVehicles != null) {
+            btnVehicles.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), VehicleActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        if (btnTransactions != null) {
+            btnTransactions.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), TransactionActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        // Reviews and Booking History moved to Home Fragment
+        if (btnReviews != null) {
+            btnReviews.setVisibility(View.GONE);
+        }
+
+        if (btnBookingHistory != null) {
+            btnBookingHistory.setVisibility(View.GONE);
+        }
+
         if (btnSettings != null) {
             btnSettings.setOnClickListener(v -> {
-                // TODO: Implement settings
                 Toast.makeText(requireContext(), "Settings akan segera tersedia", Toast.LENGTH_SHORT).show();
             });
         }

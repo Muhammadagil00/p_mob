@@ -78,6 +78,7 @@
                 android:text="Aksi Admin"
                 android:textSize="20sp"
                 android:textStyle="bold"
+                android:layout_gravity="center"
                 android:textColor="#212121"
                 android:layout_marginBottom="16dp" />
 
@@ -115,7 +116,7 @@
 
         </LinearLayout>
 
-        <!-- Recent Bookings -->
+        <!-- Booking Summary -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -125,20 +126,60 @@
             android:orientation="vertical"
             android:elevation="4dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Booking Terbaru"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="#212121"
-                android:layout_marginBottom="16dp" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvRecentBookings"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Ringkasan Booking"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#212121" />
+
+                <Button
+                    android:id="@+id/btnRefreshDashboard"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_button_outline"
+                    android:text="Refresh"
+                    android:textColor="@color/primary"
+                    android:textSize="11sp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
+
+            </LinearLayout>
+
+            <!-- Status Info -->
+            <TextView
+                android:id="@+id/tvBookingStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Memuat data booking..."
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginBottom="16dp"
+                android:gravity="center"
+                android:padding="12dp"
+                android:background="@drawable/bg_status_pending" />
+
+            <!-- Action Info -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="💡 Klik 'Lihat Semua Booking' untuk melihat detail dan mengelola status booking users"
+                android:textSize="13sp"
+                android:textColor="@color/text_secondary"
+                android:gravity="center"
+                android:padding="8dp"
+                android:background="#F0F8FF"
+                android:textStyle="italic" />
 
         </LinearLayout>
 
